@@ -784,75 +784,17 @@ async function loadAllData(){
       seenNomes.add(j.nome);
       return true;
     });
-    // Seed avaliacoes if empty
-    if(DB.avaliacoes.length===0) await seedAvaliacoes();
+    // No demo data for new clubs
   } catch(e){ console.error(e); toast('Erro ao carregar dados'); }
   showLoading(false);
   _loadingData = false;
 }
 
 async function seedJogadores(){
-  // Double-check DB is truly empty before seeding to avoid duplicates
-  const check = await sb.from('jogadores').select('id').limit(1);
-  if(check.data && check.data.length > 0) { console.log('Seed skipped - jogadores already exist'); return; }
-  const lista = [
-    {id:uid(),nome:'José Silva',num:'10',sub:'Sub13',pos:'Médio',aval:4.2,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Gil Vilaça',num:'7',sub:'Sub15',pos:'Avançado',aval:4.5,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Rodrigo Sousa',num:'5',sub:'Sub13',pos:'Defesa',aval:4.0,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Lucas Vale',num:'11',sub:'Sub15',pos:'Avançado',aval:3.8,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Simão Machado',num:'3',sub:'Sub13',pos:'Defesa',aval:4.1,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Rodrigo Figueiredo',num:'9',sub:'Sub15',pos:'Avançado',aval:4.3,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Gabriel Cavalheiro',num:'6',sub:'Sub13',pos:'Médio',aval:4.0,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Rafael Carvalho',num:'2',sub:'Sub15',pos:'Defesa',aval:4.2,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Rodrigo Ferreira',num:'8',sub:'Sub13',pos:'Médio',aval:3.9,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Gonçalo Dinis Santos',num:'4',sub:'Sub15',pos:'Guarda-redes',aval:4.4,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'João Dantas',num:'14',sub:'Sub13',pos:'Avançado',aval:3.7,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Luis Pereira',num:'1',sub:'Sub15',pos:'Defesa',aval:4.0,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Afonso Barbosa',num:'13',sub:'Sub13',pos:'Médio',aval:3.6,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Simão Graça',num:'12',sub:'Sub15',pos:'Avançado',aval:4.1,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Duarte Costa',num:'2',sub:'Sub11',pos:'Médio',aval:4.6,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Samuel Marquéz',num:'1',sub:'Sub9',pos:'Guarda-redes',aval:4.0,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Guilherme Sousa',num:'3',sub:'Sub11',pos:'Defesa',aval:3.8,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Salvador Pinheiro',num:'4',sub:'Sub9',pos:'Avançado',aval:4.1,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Rafael Mandim',num:'44',sub:'Sub11',pos:'Médio',aval:3.9,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Francisco Silva',num:'6',sub:'Sub9',pos:'Avançado',aval:4.2,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Eduardo Amorim',num:'7',sub:'Sub11',pos:'Defesa',aval:3.7,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Francisco Pinheiro',num:'9',sub:'Sub9',pos:'Médio',aval:4.0,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Enzo Monteiro',num:'11',sub:'Sub11',pos:'Avançado',aval:4.3,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Gonçalo Barbosa',num:'19',sub:'Sub9',pos:'Defesa',aval:3.8,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Rodrigo Lima',num:'76',sub:'Sub11',pos:'Guarda-redes',aval:4.1,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Guilherme Pinheiro',num:'15',sub:'Sub9',pos:'Médio',aval:3.9,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Gabriela Torres',num:'35',sub:'Sub11',pos:'Avançado',aval:4.2,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Vasco',num:'42',sub:'Sub9',pos:'Defesa',aval:3.7,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Zé Pedro',num:'79',sub:'Sub11',pos:'Médio',aval:4.0,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'Guilherme Pereira',num:'56',sub:'Sub9',pos:'Avançado',aval:3.8,nasc:'',cont:'',obs:''},
-    {id:uid(),nome:'João Silva',num:'39',sub:'Sub11',pos:'Defesa',aval:4.1,nasc:'',cont:'',obs:''},
-  ];
-  await sb.from('jogadores').insert(lista);
-  DB.jogadores = lista;
+  // Sem dados de demonstração — clube começa vazio
 }
 
-async function seedAvaliacoes(){
-  const preData = [
-    {nome:'João Silva',vals:[2,1,2,2,1,1,1,1,1,1,1,1,1,1,3,1,1,1,2]},
-    {nome:'Francisco Pinheiro',vals:[5,5,5,5,5,4,4,4,3,4,5,4,4,4,5,3,5,4,4]},
-    {nome:'Gabriela Torres',vals:[2,1,3,2,1,2,1,1,1,2,1,1,1,2,2,1,1,2,1]},
-    {nome:'Vasco',vals:[2,1,2,2,1,2,1,3,1,2,1,1,1,1,2,1,3,1,2]},
-    {nome:'Zé Pedro',vals:[2,2,3,2,2,2,2,1,1,2,1,1,1,2,1,3,2,2,2]},
-    {nome:'Rodrigo Lima',vals:[3,2,3,3,2,3,2,2,2,3,3,2,2,2,4,2,3,3,3]},
-    {nome:'Guilherme Pinheiro',vals:[1,1,2,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1,2]},
-    {nome:'Duarte Costa',vals:[4,3,4,5,4,5,4,4,4,4,4,4,4,3,4,2,4,5,4]},
-    {nome:'Guilherme Sousa',vals:[5,5,4,5,5,5,4,4,4,4,5,4,4,3,5,3,5,4,5]},
-    {nome:'Salvador Pinheiro',vals:[2,1,1,2,1,2,2,1,1,2,1,1,1,1,2,2,2,2,2]},
-    {nome:'Francisco Silva',vals:[4,4,3,3,3,4,3,3,2,3,5,5,2,2,4,2,3,3,3]},
-    {nome:'Eduardo Amorim',vals:[4,2,3,3,3,4,3,2,2,2,2,2,2,1,3,2,3,2,2]},
-    {nome:'Guilherme Pereira',vals:[3,2,2,3,3,3,3,2,2,2,2,2,2,2,4,2,3,2,3]},
-    {nome:'Gonçalo Barbosa',vals:[4,3,3,4,3,3,3,2,2,3,4,3,3,3,4,2,4,3,4]},
-  ];
-  const rows = preData.map(d=>({id:uid(),nome:d.nome,tipo:'pre',epoca:'2025/2026',data:'2025-10-05',vals:d.vals}));
-  await sb.from('avaliacoes').insert(rows);
-  DB.avaliacoes = rows;
-}
+async function seedAvaliacoes(){}
 
 // ═══ AUTH ═══
 function selectProfile(idx){
