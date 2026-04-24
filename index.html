@@ -173,22 +173,7 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div class="login-title clube-nome">AP Minho</div>
     <div class="login-sub">Hóquei em Patins — Gestão de Plantel</div>
     <div class="pin-profiles" id="profile-list">
-      <div class="pin-profile" onclick="selectProfile(0)" id="profile-0">
-        <div class="pin-profile-icon" style="background:#FEE2E2">🎯</div>
-        <div><div class="pin-profile-name">Coordenador</div><div class="pin-profile-role">Acesso total</div></div>
-      </div>
-      <div class="pin-profile" onclick="selectProfile(1)" id="profile-1">
-        <div class="pin-profile-icon" style="background:#DBEAFE">🏒</div>
-        <div><div class="pin-profile-name">Treinador Sub9+Sub11</div><div class="pin-profile-role">Grupo 1</div></div>
-      </div>
-      <div class="pin-profile" onclick="selectProfile(2)" id="profile-2">
-        <div class="pin-profile-icon" style="background:#D1FAE5">🏒</div>
-        <div><div class="pin-profile-name">Treinador Sub13+Sub15</div><div class="pin-profile-role">Grupo 2</div></div>
-      </div>
-      <div class="pin-profile" onclick="selectProfile('mesa')" id="profile-mesa" style="border-color:#F59E0B;background:#FFFBEB">
-        <div class="pin-profile-icon" style="background:#FEF3C7">📋</div>
-        <div><div class="pin-profile-name">Mesa de Jogo</div><div class="pin-profile-role">Registo do jogo</div></div>
-      </div>
+      <!-- gerado dinamicamente por renderProfileList() -->
     </div>
     <div id="pin-entry" style="display:none">
       <div class="pin-input-label">Introduz o PIN</div>
@@ -823,6 +808,31 @@ async function seedJogadores(){
 async function seedAvaliacoes(){}
 
 // ═══ AUTH ═══
+function renderProfileList(){
+  const colors=['#DBEAFE','#D1FAE5','#EDE9FE','#FEE2E2','#FEF3C7','#FCE7F3'];
+  const list=document.getElementById('profile-list');
+  if(!list)return;
+  // Coordenador sempre primeiro
+  let html=`<div class="pin-profile" onclick="selectProfile(0)" id="profile-0">
+    <div class="pin-profile-icon" style="background:#FEE2E2">🎯</div>
+    <div><div class="pin-profile-name">Coordenador</div><div class="pin-profile-role">Acesso total</div></div>
+  </div>`;
+  // Treinadores (exceto coord)
+  profiles.filter(p=>p.key!=='coord').forEach((p,i)=>{
+    const bg=colors[i%colors.length];
+    html+=`<div class="pin-profile" onclick="selectProfile(${i+1})" id="profile-${i+1}">
+      <div class="pin-profile-icon" style="background:${bg}">🏒</div>
+      <div><div class="pin-profile-name">${p.name}</div><div class="pin-profile-role">${p.grupos?p.grupos.join(', '):'Acesso total'}</div></div>
+    </div>`;
+  });
+  // Mesa de Jogo sempre no fim
+  html+=`<div class="pin-profile" onclick="selectProfile('mesa')" id="profile-mesa" style="border-color:#F59E0B;background:#FFFBEB">
+    <div class="pin-profile-icon" style="background:#FEF3C7">📋</div>
+    <div><div class="pin-profile-name">Mesa de Jogo</div><div class="pin-profile-role">Registo do jogo</div></div>
+  </div>`;
+  list.innerHTML=html;
+}
+
 function selectProfile(idx){
   selectedProfile=idx;
   if(idx==='mesa'){doLoginMesa();return;}
@@ -1700,7 +1710,7 @@ async function gerarPDFConvocatoria(){try{
 
   // ── Logo + título central ──
   const logoH=22;
-  try{doc.addImage(LOGO_B64,'PNG',W/2-30,y+2,18,18);}catch(e){}
+  try{doc.addImage(LOGO_B64,window.LOGO_MIME||'PNG',W/2-30,y+2,18,18);}catch(e){}
   doc.setFontSize(15);doc.setFont('helvetica','bold');doc.setTextColor(...RED);
   doc.text('CONVOCATÓRIA',W/2-9,y+10,{align:'left'});
   doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(...GRAY);
@@ -1931,7 +1941,7 @@ async function gerarPDFJogo(){
     doc.setFontSize(8);doc.setFont('helvetica','normal');
     doc.text('Associação de Patinagem do Minho — Hóquei em Patins',W/2,17,{align:'center'});
     y=22;
-    try{doc.addImage(LOGO_B64,'PNG',W/2-30,y+2,18,18);}catch(e){}
+    try{doc.addImage(LOGO_B64,window.LOGO_MIME||'PNG',W/2-30,y+2,18,18);}catch(e){}
     doc.setFontSize(15);doc.setFont('helvetica','bold');doc.setTextColor(...RED);
     doc.text('RELATÓRIO DE JOGO',W/2-9,y+10,{align:'left'});
     doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(...GRAY);
@@ -2779,7 +2789,9 @@ function aplicarIdentidadeClube(){
   // Logo
   if(logo){
     document.querySelectorAll('.clube-logo').forEach(el=>{el.src=logo;el.style.display='block';});
-    window.LOGO_B64_CLUBE=logo.split(',')[1]||logo;
+    const b64=logo.includes(',')?logo.split(',')[1]:logo;
+    window.LOGO_B64=b64;
+    window.LOGO_MIME=logo.includes('png')?'PNG':'JPEG';
   }
 }
 
@@ -2912,7 +2924,7 @@ async function savePerfil(){
   }
   await sb.from('config').upsert({key:'pins',value:JSON.stringify(DB.config.pins)});
   await sb.from('config').upsert({key:'profiles',value:JSON.stringify(profiles.map(p=>({key:p.key,name:p.name,role:p.role||p.name,grupos:p.grupos,licenca:p.licenca||'',cont:p.cont||''})))});
-  closeModal('modal-perfil');toast('✅ Perfil guardado!');renderAdmin();
+  closeModal('modal-perfil');toast('✅ Perfil guardado!');renderAdmin();renderProfileList();
 }
 async function deletePerfil(key){
   if(key==='coord'){alert('O coordenador não pode ser apagado');return;}
@@ -3398,7 +3410,7 @@ Dados:
 // ═══ INIT ═══
 document.getElementById('ses-data').value=new Date().toISOString().split('T')[0];
 document.getElementById('conv-data').value=new Date().toISOString().split('T')[0];
-loadAllData().then(()=>{console.log('AP Minho — dados carregados do Supabase');aplicarIdentidadeClube();});
+loadAllData().then(()=>{console.log('AP Minho — dados carregados do Supabase');aplicarIdentidadeClube();renderProfileList();});
 </script>
 </body>
 </html>
