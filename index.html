@@ -932,7 +932,14 @@ function renderPage(p){
 }
 function buildGrupoTabs(cid,pageKey){
   const c=document.getElementById(cid); if(!c)return;
-  const grupos=currentUser?.grupos||GRUPOS;
+  const grupos=(currentUser?.key==='coord'||!currentUser?.grupos)?GRUPOS:currentUser.grupos;
+  if(!grupos||grupos.length===0){
+    c.innerHTML=currentUser?.key==='coord'
+      ?'<span style="font-size:12px;color:var(--gray-400);padding:4px 0">Sem grupos — cria em Administração ⚙️</span>'
+      :'';
+    return;
+  }
+  if(!grupos.includes(currentGrupo[pageKey])) currentGrupo[pageKey]=grupos[0];
   c.innerHTML=grupos.map(g=>`<div class="gtab ${currentGrupo[pageKey]===g?'active':''}" onclick="setGrupo('${pageKey}','${g}')">${g}</div>`).join('');
 }
 function setGrupo(page,g){currentGrupo[page]=g;renderPage(page);}
@@ -2893,7 +2900,7 @@ function renderAdminGrupos(){
   const el=document.getElementById('admin-grupos-list');if(!el)return;
   el.innerHTML=GRUPOS.map((g,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px">
     <div style="flex:1"><strong>${g}</strong></div>
-    ${GRUPOS.length>1?`<button class="btn btn-sm" style="color:#DC2626;border-color:#FCA5A5" onclick="deleteGrupo(${i})">🗑️</button>`:'<span style="font-size:10px;color:var(--gray-400)">Mínimo 1</span>'}
+    <button class="btn btn-sm" style="color:#DC2626;border-color:#FCA5A5" onclick="deleteGrupo(${i})">🗑️</button>
   </div>`).join('');
 }
 function openModalPerfil(key){
