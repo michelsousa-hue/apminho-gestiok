@@ -306,13 +306,15 @@ textarea.form-input{resize:vertical;min-height:70px}
   <div class="app-body">
     <nav class="sidebar" id="sidebar">
       <div class="nav-section admin-only" style="display:none">Administração</div>
-      <div class="nav-item admin-only" data-page="admin" style="display:none" onclick="navGo(this)"><span class="nav-icon">⚙️</span>Administração</div>
+      <div class="nav-item admin-only" data-page="admin" style="display:none"><span class="nav-icon">⚙️</span>Administração</div>
+      <div class="nav-item admin-only" data-page="comunicados" style="display:none"><span class="nav-icon">📢</span>Comunicados</div>
       <div class="nav-section tesour-only" style="display:none">Tesouraria</div>
+      <div class="nav-item tesour-only" data-page="comunicados" style="display:none"><span class="nav-icon">📢</span>Comunicados</div>
       <div class="nav-item tesour-only" data-page="socios" style="display:none"><span class="nav-icon">🏅</span>Sócios</div>
       <div class="nav-item tesour-only" data-page="caixa" style="display:none"><span class="nav-icon">💰</span>Fluxo de Caixa</div>
       <div class="nav-section coord-only" style="display:none">Coordenação</div>
+      <div class="nav-item coord-only" data-page="comunicados" style="display:none"><span class="nav-icon">📢</span>Comunicados</div>
       <div class="nav-section">Principal</div>
-      <div class="nav-item" id="nav-comunicados" data-page="comunicados" style="display:none" onclick="navGo(this)"><span class="nav-icon">📢</span>Comunicados</div>
       <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span>Dashboard</div>
       <div class="nav-item" data-page="presencas"><span class="nav-icon">✅</span>Presenças</div>
       <div class="nav-item" data-page="jogadores"><span class="nav-icon">👥</span>Jogadores</div>
@@ -327,6 +329,7 @@ textarea.form-input{resize:vertical;min-height:70px}
       <div class="nav-section">Jogo</div>
       <div class="nav-item" data-page="jogo"><span class="nav-icon">🏒</span>Jogo ao Vivo</div>
       <div class="nav-section coord-only" style="display:none">Administração</div>
+      <div class="nav-item coord-only" data-page="comunicados" style="display:none"><span class="nav-icon">📢</span>Comunicados</div>
       <div class="nav-item coord-only" data-page="socios" style="display:none"><span class="nav-icon">🏅</span>Sócios</div>
       <div class="nav-item coord-only" data-page="admin" style="display:none"><span class="nav-icon">⚙️</span>Administração</div>
       </nav>
@@ -614,8 +617,6 @@ textarea.form-input{resize:vertical;min-height:70px}
         </div>
         <div class="card" style="margin-top:12px">
           <div class="card-title" style="margin-bottom:12px">🏒 Grupos / Escalões</div>
-        <div class="card" style="margin-top:12px">
-          <div class="card-title" style="margin-bottom:12px">🏒 Grupos / Escalões</div>
           <div id="admin-grupos-list" style="margin-bottom:12px"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <input type="text" class="form-input" id="novo-grupo-nome" placeholder="Ex: Sub17+Sub20" style="max-width:200px">
@@ -625,11 +626,10 @@ textarea.form-input{resize:vertical;min-height:70px}
           <div style="font-size:11px;color:var(--gray-400);margin-top:6px">Os grupos definem quais escalões pertencem a cada treinador.</div>
         </div>
       </div>
+      <!-- ── FIM page-admin ── -->
 
-      <!-- ── SÓCIOS ── -->
-      <div 
-      </div>
-id="page-comunicados" class="page">
+      <!-- ── COMUNICADOS ── -->
+      <div id="page-comunicados" class="page">
         <div class="page-header">
           <div><div class="page-title">Comunicados</div><div class="page-sub">Escreve e exporta comunicados para os pais</div></div>
           <div style="display:flex;gap:8px">
@@ -1395,13 +1395,6 @@ function setupForUser(){
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
   document.querySelectorAll('.tesour-only').forEach(el=>el.style.display=(isTesour||isAdmin)?'':'none');
   document.querySelectorAll('.coord-only').forEach(el=>el.style.display=(isCoordTec||isAdmin)?'':'none');
-  // Comunicados: visível para Admin, Tesoureiro e CoordTec
-  const navCom=document.getElementById('nav-comunicados');
-  if(navCom) navCom.style.display=(isAdmin||isTesour||isCoordTec)?'':'none';
-  // Admin: garantir que todos os itens do nav principal ficam visíveis
-  if(isAdmin){
-    document.querySelectorAll('.nav-item[data-page]').forEach(el=>el.style.display='');
-  }
 
   if(isTesour){
     document.querySelectorAll('.nav-section:not(.tesour-only)').forEach(el=>el.style.display='none');
@@ -1432,19 +1425,14 @@ function doLoginMesa(){
 // ═══ NAV ═══
 function navGo(el){
   const p=el.dataset.page; if(!p)return;
-  // Remover active de todos os nav-items visíveis
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
-  // Esconder todas as páginas e mostrar a correcta
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  const pg=document.getElementById('page-'+p);
-  if(pg){pg.classList.add('active');}
-  currentPage=p;
-  renderPage(p);
+  const pg=document.getElementById('page-'+p); if(pg)pg.classList.add('active');
+  currentPage=p; renderPage(p);
 }
 document.getElementById('sidebar').addEventListener('click',e=>{
-  const el=e.target.closest('.nav-item[data-page]');
-  if(el && el.style.display!=='none') navGo(el);
+  const el=e.target.closest('.nav-item[data-page]'); if(el)navGo(el);
 });
 function renderPage(p){
   const map={dashboard:renderDashboard,presencas:renderPresencas,jogadores:renderJogadores,sessoes:renderSessoes,ficha:renderFichaPage,avaliacao:renderAvaliacao,relatorio:renderRelatorio,convocatoria:renderConvocatoria,jogo:renderJogoAoVivo,admin:renderAdmin,treinos:renderTreinos,metodologia:renderMetodologia,socios:renderSocios,comunicados:()=>{},caixa:renderCaixa};
