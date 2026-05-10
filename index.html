@@ -2077,7 +2077,9 @@ function getAvalData(tipo){
 }
 function renderAvaliacao(){
   const grupos=currentUser?.grupos||GRUPOS;
-  const subLabel=grupos.join(' + ')||'Todos os escalões';
+  // Mostrar os escalões reais (subs) em vez do nome do grupo
+  const todosOsSubs=grupos.flatMap(g=>getSubsForGrupo(g));
+  const subLabel=(todosOsSubs.length?todosOsSubs:grupos).join(' + ')||'Todos os escalões';
   const subEl=document.getElementById('aval-page-sub');
   if(subEl) subEl.textContent=subLabel+' · Competências individuais';
   renderAvalRanking();
